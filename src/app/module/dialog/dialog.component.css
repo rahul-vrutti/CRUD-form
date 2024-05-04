@@ -1,0 +1,14 @@
+#delete {
+    background-color: rgb(255, 61, 61);
+    color: white;
+}
+
+#not_delete {
+    border: 0.1px solid rgb(179, 179, 179);
+}
+
+.mat-mdc-dialog-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}

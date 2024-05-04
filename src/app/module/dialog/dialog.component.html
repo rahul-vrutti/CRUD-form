@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>Confirm Action</h2>
+<mat-dialog-content>
+    Are you sure you want to confirm this action?
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button mat-dialog-close id="not_delete">No</button>
+    <button mat-button mat-dialog-close cdkFocusInitial (click)="delateDevice()" id="delete">Yes</button>
+</mat-dialog-actions>
