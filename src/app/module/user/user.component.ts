@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
@@ -17,6 +17,9 @@ import { PcList } from '../../interface/pcList.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DialogComponent } from '../dialog/dialog.component';
+import { UserStore } from '../../shared/signal.store';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from '../../auth.interceptor';
 
 @Component({
   selector: 'app-user',
@@ -26,6 +29,7 @@ import { DialogComponent } from '../dialog/dialog.component';
   imports: [ReactiveFormsModule, MatInputModule, MatButtonModule, MatExpansionModule, MatAccordion, MatFormFieldModule, MatSelectModule, MatTableModule, MatPaginatorModule, DevicePipe, MatIconModule, MatDialogModule],
 })
 export class UserComponent {
+  readonly userStore = inject(UserStore)
   isEdit: boolean = false;
   beforeUpdateUser: any;
   userCrudFrom!: FormGroup;
@@ -80,12 +84,11 @@ export class UserComponent {
   }
 
   cancelButton() {
-    // this.userCrudFrom.reset();
     this.accordion?.closeAll();
     this.isOpen = !this.isOpen;
   }
 
-  addNewUser() {
+  async addNewUser() {
 
     if (this.userCrudFrom.valid) {
       const pc_list = this.userCrudFrom.value.pc_permission;
@@ -97,21 +100,16 @@ export class UserComponent {
 
       this.userCrudFrom.value.pc_permission = new_pc_permission
 
-      this.userService.addUser(this.userCrudFrom.value).subscribe((res: any) => {
-        if (res.success) {
-          this.toastr.success(res.message, 'Success');
-          this.getAllUsers();
-          this.cancelButton();
-        } else {
-          this.toastr.error(res.message, 'Error');
-        }
-      }, err => {
-        this.toastr.error(err.error.message, 'Error');
-      })
+      const isDataCreated = await this.userStore.createUserData(this.userCrudFrom.value);
+      if (isDataCreated) {
+        this.userDataSource = this.userStore.userData();
+        this.setMatTable();
+        this.cancelButton();
+      }
     }
   }
 
-  updateUser() {
+  async updateUser() {
     if (this.userCrudFrom.valid) {
       console.log('updateUser: called');
       const pc_list = this.userCrudFrom.value.pc_permission;
@@ -123,18 +121,13 @@ export class UserComponent {
 
       this.userCrudFrom.value.pc_permission = new_pc_permission
 
-      this.userService.updateUser(this.beforeUpdateUser.user_id, this.userCrudFrom.value).subscribe((res: any) => {
-        if (res.success) {
-          this.toastr.success(res.message, 'Success');
-          this.getAllUsers();
-          this.cancelButton();
-          // this.userCrudFrom.reset();
-        } else {
-          this.toastr.error(res.message, 'Error');
-        }
-      }, err => {
-        this.toastr.error(err.error.message, 'Error');
-      })
+      const isDataLoad = await this.userStore.updateUserData(this.beforeUpdateUser.user_id, this.userCrudFrom.value);
+      if (isDataLoad) {
+        this.userDataSource = this.userStore.userData();
+        this.setMatTable();
+        this.cancelButton();
+      }
+
     }
   }
 
@@ -163,13 +156,12 @@ export class UserComponent {
     })
   }
 
-  getAllUsers() {
-    this.userService.getUser().subscribe((res: any) => {
-      this.userDataSource = res.data;
+  async getAllUsers() {
+    const isDataLoad = await this.userStore.getFormData();
+    if (isDataLoad) {
+      this.userDataSource = this.userStore.userData();
       this.setMatTable();
-    }, err => {
-      console.log('error while fetching data');
-    })
+    }
   }
 
   setMatTable() {
@@ -192,7 +184,7 @@ export class UserComponent {
     this.beforeUpdateUser = element;
     this.dialog.open(DialogComponent, { data: { id: this.beforeUpdateUser.user_id } }).afterClosed().subscribe(data => {
       if (data.data == 'true') {
-        this.getAllUsers();
+        this.userDataSource = this.userStore.userData();
       }
     });
   }
@@ -203,4 +195,14 @@ export class UserComponent {
       this.userCrudFrom.get('password')?.updateValueAndValidity()
     }
   }
+
+  delete(element: any) {
+    this.beforeUpdateUser = element;
+    this.openDialog(element);
+  }
+
+  setUserData(data: any) {
+    this.userDataSource = data;
+  }
+
 }

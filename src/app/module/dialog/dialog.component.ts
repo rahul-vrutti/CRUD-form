@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MatDialogRef,
@@ -10,6 +10,8 @@ import {
 } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../service/user.service';
+import { UserStore } from '../../shared/signal.store';
+import { UserComponent } from '../user/user.component';
 @Component({
   selector: 'app-dialog',
   standalone: true,
@@ -18,22 +20,18 @@ import { UserService } from '../../service/user.service';
   styleUrl: './dialog.component.css'
 })
 export class DialogComponent {
+  readonly userStore = inject(UserStore)
   constructor(
     private userService: UserService,
     public dialogRef: MatDialogRef<DialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any, private toast: ToastrService
   ) { }
 
-  delateDevice() {
-    this.userService.deleteUser(this.data.id).subscribe((res: any) => {
-      if (res.success == true) {
-        this.dialogRef.close({ action: 1, data: "true" });
-        this.toast.success(res.message, 'Success');
-      }
-    }, err => {
-      this.toast.error(err.error.message, 'Error');
-    });
-    this.dialogRef.close();
+  async delateDevice() {
+    const deleteUser = await this.userStore.deleteUserData(this.data.id);
+    if (deleteUser) {
+      this.dialogRef.close({ action: 1, data: "true" });
+    }
   }
 
 }

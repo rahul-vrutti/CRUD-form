@@ -1,0 +1,20 @@
+<div class="flex justify-center items-center h-screen">
+    <form [formGroup]="loginCrudForm">
+        <div class="flex flex-col bg-white p-5 items-center rounded-md shadow-xl">
+            <div class="font-medium text-2xl mb-4">Login</div>
+            <mat-form-field appearance="outline" class="">
+                <mat-label>Email</mat-label>
+                <input type="email" matInput placeholder="Enter email" formControlName="email">
+                <mat-error>Please enter email</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="my-4">
+                <mat-label>Password</mat-label>
+                <input type="password" matInput placeholder="Enter password" formControlName="password">
+                <mat-error>Please enter password</mat-error>
+            </mat-form-field>
+
+            <button mat-flat-button color="primary" class="w-[50%]" (click)="login()">Log In</button>
+        </div>
+    </form>
+</div>
