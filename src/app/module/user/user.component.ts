@@ -185,6 +185,8 @@ export class UserComponent {
     this.dialog.open(DialogComponent, { data: { id: this.beforeUpdateUser.user_id } }).afterClosed().subscribe(data => {
       if (data.data == 'true') {
         this.userDataSource = this.userStore.userData();
+        this.setMatTable();
+        this.cancelButton();
       }
     });
   }
