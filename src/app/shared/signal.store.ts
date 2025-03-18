@@ -1,6 +1,6 @@
 import { withDevtools } from "@angular-architects/ngrx-toolkit";
 import { inject, signal } from "@angular/core";
-import { patchState, signalStore, withMethods, withState } from "@ngrx/signals";
+import { patchState, signalStore, withHooks, withMethods, withState } from "@ngrx/signals";
 import { UserService } from "../service/user.service";
 import { ToastrService } from "ngx-toastr";
 
@@ -78,6 +78,7 @@ export const UserStore = signalStore(
                                 }
                             }
                             patchState(store, { userData: [...store.userData()] });
+                            // console.log(store.userData());
                             toster.success(res.message, 'Success');
                             resolve(true)
                         } else {
@@ -104,7 +105,18 @@ export const UserStore = signalStore(
                 })
             }
         }
-    }
-    )
+    }),
+
+    withHooks(store => {
+        return {
+            onInit() {
+                store.getFormData();
+                console.log("Function callled in store with hooks");
+            },
+            onDestroy() {
+                console.log("Function callled in store with hooks - OnDestroy");
+            },
+        }
+    })
 
 )

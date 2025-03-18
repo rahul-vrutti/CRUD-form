@@ -178,6 +178,7 @@ export class UserComponent {
     this.userCrudFrom.patchValue(element);
     this.openModel();
     this.setValidator();
+    this.scrollToTop('scrollableElement')
   }
 
   openDialog(element: any) {
@@ -205,6 +206,13 @@ export class UserComponent {
 
   setUserData(data: any) {
     this.userDataSource = data;
+  }
+
+  scrollToTop(elementId: string) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
 }
